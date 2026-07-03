@@ -205,6 +205,21 @@ Las pruebas demostraron que la VPN Site-to-Site basada en políticas fue impleme
 
 ---
 
+# Video de la práctica
+
+Como parte de los entregables, se realizó un video demostrativo donde se muestra:
+
+- La topología implementada.
+- La configuración de la VPN.
+- La prueba de conectividad entre las redes LAN.
+- La verificación del correcto funcionamiento del túnel IPSec.
+
+**Enlace del video:**
+
+https://youtu.be/NIcKg9zEqE0?si=EcgrtBftB_4z68Zz
+
+---
+
 # Conclusión
 
 La implementación de una VPN IPSec basada en políticas permitió establecer una comunicación cifrada entre dos sedes remotas utilizando una infraestructura WAN simulada. Se verificó el funcionamiento mediante pruebas de conectividad exitosas entre ambas LAN, comprobando que el tráfico viaja de forma segura a través del túnel VPN.
