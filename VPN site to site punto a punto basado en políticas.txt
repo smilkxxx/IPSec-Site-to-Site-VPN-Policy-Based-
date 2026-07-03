@@ -1,0 +1,121 @@
+VPN Site-to-Site Punto a Punto Basada en Políticas (Policy-Based VPN)
+con IPSec IKEv1
+
+Topología
+
+VPCS1 —- R1 ——– ISP ——– R2 —- VPCS2 | | LAN1 192.168.10.0 LAN2
+192.168.20.0
+
+Direccionamiento
+
+R1 G0/0 -> 200.1.1.1/30 G0/1 -> 192.168.10.1/24
+
+ISP G0/0 -> 200.1.1.2/30 G0/1 -> 200.1.1.5/30
+
+R2 G0/0 -> 200.1.1.6/30 G0/1 -> 192.168.20.1/24
+
+PC1 192.168.10.10/24 Gateway: 192.168.10.1
+
+PC2 192.168.20.10/24 Gateway: 192.168.20.1
+
+===================================================== PASO 1 - Verificar
+conectividad =====================================================
+
+En R1: ping 200.1.1.6
+
+En R2: ping 200.1.1.1
+
+En PC1: ping 192.168.20.10
+
+===================================================== PASO 2 -
+Configurar IKEv1 =====================================================
+
+R1
+
+conf t crypto isakmp policy 10 encr aes hash sha authentication
+pre-share group 2 lifetime 86400 exit
+
+crypto isakmp key cisco123 address 200.1.1.6
+
+------------------------------------------------------------------------
+
+R2
+
+conf t crypto isakmp policy 10 encr aes hash sha authentication
+pre-share group 2 lifetime 86400 exit
+
+crypto isakmp key cisco123 address 200.1.1.1
+
+===================================================== PASO 3 - Crear el
+Transform Set =====================================================
+
+En ambos routers
+
+crypto ipsec transform-set VPN-SET esp-aes esp-sha-hmac mode tunnel
+
+===================================================== PASO 4 - Crear la
+ACL =====================================================
+
+R1
+
+access-list 110 permit ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255
+
+R2
+
+access-list 110 permit ip 192.168.20.0 0.0.0.255 192.168.10.0 0.0.0.255
+
+===================================================== PASO 5 - Crear el
+Crypto Map =====================================================
+
+R1
+
+crypto map VPNMAP 10 ipsec-isakmp set peer 200.1.1.6 set transform-set
+VPN-SET match address 110
+
+------------------------------------------------------------------------
+
+R2
+
+crypto map VPNMAP 10 ipsec-isakmp set peer 200.1.1.1 set transform-set
+VPN-SET match address 110
+
+===================================================== PASO 6 - Aplicar
+el Crypto Map =====================================================
+
+R1
+
+interface g0/0 crypto map VPNMAP
+
+R2
+
+interface g0/0 crypto map VPNMAP
+
+===================================================== PASO 7 - Guardar
+=====================================================
+
+end write memory
+
+===================================================== PASO 8 - Probar la
+VPN =====================================================
+
+Desde PC1
+
+ping 192.168.20.10
+
+El primer ping puede fallar mientras se establece el túnel.
+
+===================================================== PASO 9 - Verificar
+=====================================================
+
+show crypto isakmp sa
+
+Debe aparecer el estado:
+
+QM_IDLE
+
+Luego verificar:
+
+show crypto ipsec sa
+
+Los contadores encaps y decaps deben aumentar cuando exista tráfico
+entre las dos LAN.
